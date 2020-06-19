@@ -1,19 +1,20 @@
 {
-  "name": "tefeta",
+  "name": "pp-tefeta",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/MestrieEsteban/pp-tefeta.git"
-  },
+  "main": "maze.js",
+  "repository": "https://github.com/MestrieEsteban/pp-tefeta.git",
   "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/MestrieEsteban/pp-tefeta/issues"
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node src/script.ts",
+    "build": "tsc",
+    "docker": "yarn docker-build && yarn docker-run",
+    "docker-build": "docker build -t tefeta -f Dockerfile .",
+    "docker-run": "docker run --rm -it tefeta"
   },
-  "homepage": "https://github.com/MestrieEsteban/pp-tefeta#readme"
+  "dependencies": {
+    "@types/node": "^13.13.5",
+    "ts-node": "^8.10.1",
+    "typescript": "^3.8.3"
+  }
 }
