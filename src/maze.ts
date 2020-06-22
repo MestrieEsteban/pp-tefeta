@@ -12,48 +12,47 @@ class Maze {
 	mazeEnd: string;
 	lastPos: string = 'Bot';
 	isSolved: boolean = false;
-	nextNode: string[] = [];
+	nextPosition: string[] = [];
 	step: number = 0;
 	currentPos: string[] = [];
 
-
-
-
 	solve(){
 		this.step++
-		for (let coord of this.currentPos) {
-			if (coord === this.mazeStart) {
-				this.mazeWithPosition[coord].step = 0;
+		for (let pos of this.currentPos) {
+			if (pos === this.mazeStart) {
+				this.mazeWithPosition[pos].step = 0;
 			}
-			let intCoord = coord.split(":").map((val) => { return parseInt(val, 10) });
-			console.log(intCoord)
-			
-			this.updateStep((intCoord[0] + 1) + ":" + intCoord[1], this.mazeWithPosition[coord].step + 1);
-			this.updateStep((intCoord[0] - 1) + ":" + intCoord[1], this.mazeWithPosition[coord].step + 1);
-			this.updateStep(intCoord[0] + ":" + (intCoord[1] + 1), this.mazeWithPosition[coord].step + 1);
-			this.updateStep(intCoord[0] + ":" + (intCoord[1] - 1), this.mazeWithPosition[coord].step + 1);
+			let XandY = pos.split(":").map((val) => { return parseInt(val, 10) });
+			let X = XandY[0]
+			let Y = XandY[1]
+			this.changeStep(X,Y)
 		}
-
-		this.currentPos = this.nextNode;
-		this.nextNode = [];
+		this.currentPos = this.nextPosition;
 	}
 
-	private updateStep(coord: string, step: number) {
-		if (!this.mazeWithPosition[coord]) { return; }
-		switch (this.mazeWithPosition[coord].path) {
-			case " ":
-				if (this.mazeWithPosition[coord].step >= 0) { return; }
-				this.mazeWithPosition[coord].step = step;
-				this.nextNode.push(coord);
-				break;
-			case "2":
-				this.mazeWithPosition[coord].step = step;
-				this.nextNode.push(coord);
-				this.mazeEnd = coord;
-				this.isSolved = true;
-				break;
-			default:
-				break;
+	private changeStep(X:number, Y:number)
+	{
+		this.stepPosition((X + 1) + ":" + Y, this.mazeWithPosition[`${X}:${Y}`].step + 1);
+		this.stepPosition((X - 1) + ":" + Y, this.mazeWithPosition[`${X}:${Y}`].step + 1);
+		this.stepPosition(X + ":" + (Y + 1), this.mazeWithPosition[`${X}:${Y}`].step + 1);
+		this.stepPosition(X + ":" + (Y - 1), this.mazeWithPosition[`${X}:${Y}`].step + 1);
+	}
+
+	private stepPosition(pos: string, step: number) {
+
+		if (!this.mazeWithPosition[pos]) { return; }
+
+		if(this.mazeWithPosition[pos].path == ' ')
+		{
+			if (this.mazeWithPosition[pos].step >= 0) { return; }
+			this.mazeWithPosition[pos].step = step;
+			this.nextPosition.push(pos);
+		}
+		if(this.mazeWithPosition[pos].path == '2')
+		{
+			this.mazeWithPosition[pos].step = step;
+			console.log(step)
+			this.isSolved = true;
 		}
 	}
 
@@ -66,7 +65,6 @@ function solveMaze() {
 	
 	maze.currentPos.push(maze.mazeStart);
 	
-	console.log(maze.currentPos)
 	while (maze.isSolved != true) {
 		maze.solve()
 	}
