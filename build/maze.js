@@ -13,17 +13,25 @@ var Maze = /** @class */ (function () {
         this.nextPosition = [];
         this.step = 0;
         this.currentPos = [];
+        this.count = 0;
     }
     Maze.prototype.solve = function () {
         this.step++;
         for (var _i = 0, _a = this.currentPos; _i < _a.length; _i++) {
             var pos = _a[_i];
             if (pos === this.mazeStart) {
+                this.count++;
                 this.mazeWithPosition[pos].step = 0;
+                // for(let test in this.mazeWithPosition)
+                // {
+                // 	if(this.mazeWithPosition[test].isPath == 'yes'){
+                // 		this.mazeWithPosition[test].isPath = 'no'
+                // 	}
+                // }
             }
-            var XandY = pos.split(":").map(function (val) { return parseInt(val, 10); });
-            var X = XandY[0];
-            var Y = XandY[1];
+            var XandY = pos.split(":");
+            var X = parseInt(XandY[0], 10);
+            var Y = parseInt(XandY[1], 10);
             this.changeStep(X, Y);
         }
         this.currentPos = this.nextPosition;
@@ -43,11 +51,11 @@ var Maze = /** @class */ (function () {
                 return;
             }
             this.mazeWithPosition[pos].step = step;
+            this.mazeWithPosition[pos].isPath = 'yes';
             this.nextPosition.push(pos);
         }
         if (this.mazeWithPosition[pos].path == '2') {
             this.mazeWithPosition[pos].step = step;
-            console.log(step);
             this.isSolved = true;
         }
     };
@@ -60,17 +68,14 @@ function solveMaze() {
     while (maze.isSolved != true) {
         maze.solve();
     }
+    console.log(maze.mazeWithPosition);
     console.timeEnd('Solved in');
 }
 function myMaze(mazePath) {
-    //Import du labyrinthe
     var mazeRaw = fs_1.readFileSync('data/maps/' + mazePath + '.map', 'utf8');
-    //Split tout les ligne
     var mazeLine = mazeRaw.split('\n');
     var maze = new Maze();
-    //Taille du labyrinthe
     maze.mazeSize = mazeLine[0].split("x");
-    //Permet de donnée des position a différent case du labyrinthe
     var y = -1;
     for (var _i = 0, mazeLine_1 = mazeLine; _i < mazeLine_1.length; _i++) {
         var line = mazeLine_1[_i];
@@ -84,7 +89,8 @@ function myMaze(mazePath) {
             x++;
             var position = x + ":" + y;
             maze.mazeWithPosition[position] = {
-                path: value
+                path: value,
+                isPath: 'no'
             };
             if (value == "1") {
                 maze.mazeStart = position;

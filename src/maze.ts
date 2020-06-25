@@ -15,16 +15,25 @@ class Maze {
 	nextPosition: string[] = [];
 	step: number = 0;
 	currentPos: string[] = [];
+	count:number=0
 
 	solve(){
 		this.step++
 		for (let pos of this.currentPos) {
 			if (pos === this.mazeStart) {
+				this.count++
 				this.mazeWithPosition[pos].step = 0;
+				// for(let test in this.mazeWithPosition)
+				// {
+				// 	if(this.mazeWithPosition[test].isPath == 'yes'){
+				// 		this.mazeWithPosition[test].isPath = 'no'
+				// 	}
+					
+				// }
 			}
-			let XandY = pos.split(":").map((val) => { return parseInt(val, 10) });
-			let X = XandY[0]
-			let Y = XandY[1]
+			let XandY = pos.split(":");
+			let X = parseInt(XandY[0], 10)
+			let Y = parseInt(XandY[1], 10)
 			this.changeStep(X,Y)
 		}
 		this.currentPos = this.nextPosition;
@@ -41,17 +50,16 @@ class Maze {
 	private stepPosition(pos: string, step: number) {
 
 		if (!this.mazeWithPosition[pos]) { return; }
-
 		if(this.mazeWithPosition[pos].path == ' ')
 		{
 			if (this.mazeWithPosition[pos].step >= 0) { return; }
 			this.mazeWithPosition[pos].step = step;
+			this.mazeWithPosition[pos].isPath = 'yes';
 			this.nextPosition.push(pos);
 		}
 		if(this.mazeWithPosition[pos].path == '2')
 		{
 			this.mazeWithPosition[pos].step = step;
-			console.log(step)
 			this.isSolved = true;
 		}
 	}
@@ -68,23 +76,20 @@ function solveMaze() {
 	while (maze.isSolved != true) {
 		maze.solve()
 	}
+	console.log(maze.mazeWithPosition)
 	console.timeEnd('Solved in')
 }
 
 
 
 function myMaze(mazePath: string) {
-	//Import du labyrinthe
 	let mazeRaw = readFileSync('data/maps/' + mazePath + '.map', 'utf8');
-	//Split tout les ligne
 	let mazeLine = mazeRaw.split('\n');
 
 	let maze = new Maze();
 
-	//Taille du labyrinthe
 	maze.mazeSize = mazeLine[0].split("x")
 
-	//Permet de donnée des position a différent case du labyrinthe
 	let y: number = -1;
 	for (let line of mazeLine) {
 		let x: number = -1;
@@ -95,6 +100,7 @@ function myMaze(mazePath: string) {
 			let position = `${x}:${y}`;
 			maze.mazeWithPosition[position] = {
 				path: value,
+				isPath:'no'
 			}
 			if (value == "1") {
 				maze.mazeStart = position;
