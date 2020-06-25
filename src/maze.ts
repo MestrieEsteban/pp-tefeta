@@ -6,23 +6,23 @@ class Maze {
 	//left 	= x -1
 	//Right = x +1
 
-	mazeSize: Array<string>;
 	mazeWithPosition: object = {};
 	mazeStart: string;
 	mazeEnd: string;
 	lastPos: string = 'Bot';
 	isSolved: boolean = false;
 	nextPosition: string[] = [];
-	step: number = 0;
+	etp: number = 0;
 	currentPos: string[] = [];
 	count:number=0
+	mazeSaveArray:string;
 
 	solve(){
-		this.step++
+		this.etp++
 		for (let pos of this.currentPos) {
 			if (pos === this.mazeStart) {
 				this.count++
-				this.mazeWithPosition[pos].step = 0;
+				this.mazeWithPosition[pos].etp = 0;
 				// for(let test in this.mazeWithPosition)
 				// {
 				// 	if(this.mazeWithPosition[test].isPath == 'yes'){
@@ -41,32 +41,33 @@ class Maze {
 
 	private changeStep(X:number, Y:number)
 	{
-		this.stepPosition((X + 1) + ":" + Y, this.mazeWithPosition[`${X}:${Y}`].step + 1);
-		this.stepPosition((X - 1) + ":" + Y, this.mazeWithPosition[`${X}:${Y}`].step + 1);
-		this.stepPosition(X + ":" + (Y + 1), this.mazeWithPosition[`${X}:${Y}`].step + 1);
-		this.stepPosition(X + ":" + (Y - 1), this.mazeWithPosition[`${X}:${Y}`].step + 1);
+		this.position((X + 1) + ":" + Y, this.mazeWithPosition[`${X}:${Y}`].etp + 1);
+		this.position((X - 1) + ":" + Y, this.mazeWithPosition[`${X}:${Y}`].etp + 1);
+		this.position(X + ":" + (Y + 1), this.mazeWithPosition[`${X}:${Y}`].etp + 1);
+		this.position(X + ":" + (Y - 1), this.mazeWithPosition[`${X}:${Y}`].etp + 1);
 	}
 
-	private stepPosition(pos: string, step: number) {
+	private position(pos: string, etp: number) {
 
 		if (!this.mazeWithPosition[pos]) { return; }
 		if(this.mazeWithPosition[pos].path == ' ')
 		{
-			if (this.mazeWithPosition[pos].step >= 0) { return; }
-			this.mazeWithPosition[pos].step = step;
-			this.mazeWithPosition[pos].isPath = 'yes';
+			if (this.mazeWithPosition[pos].etp >= 0) { return; }
+			this.mazeWithPosition[pos].etp = etp;
+			this.mazeWithPosition[pos].isPath = '.';
 			this.nextPosition.push(pos);
 		}
 		if(this.mazeWithPosition[pos].path == '2')
 		{
-			this.mazeWithPosition[pos].step = step;
+			this.mazeWithPosition[pos].etp = etp;
 			this.isSolved = true;
 		}
 	}
 
+
 }
 
-function solveMaze() {
+function solveMaze(): void {
 	console.time('Solved in')
 
 	const maze = myMaze(process.argv[2]);
@@ -76,20 +77,37 @@ function solveMaze() {
 	while (maze.isSolved != true) {
 		maze.solve()
 	}
-	console.log(maze.mazeWithPosition)
+	save(maze)
 	console.timeEnd('Solved in')
 }
 
+function save(maze:Maze){
+	let oldY= 0
+	for(let obj in maze.mazeWithPosition)
+		{
+			let XandY = obj.split(":");
+			let X = parseInt(XandY[0], 10)
+			let Y = parseInt(XandY[1], 10)
+			if(Y > oldY)
+			{
+				maze.mazeSaveArray = maze.mazeSaveArray+'\n'
+			}
+			if(maze.mazeWithPosition[obj]['etp']){
+				maze.mazeSaveArray = maze.mazeSaveArray+maze.mazeWithPosition[obj]['isPath']
+			}else{
+				maze.mazeSaveArray = maze.mazeSaveArray+maze.mazeWithPosition[obj]['path']
+			}
+			oldY = Y
+		}
+		console.log(maze.mazeSaveArray)
 
+}
 
-function myMaze(mazePath: string) {
+function myMaze(mazePath: string): Maze {
 	let mazeRaw = readFileSync('data/maps/' + mazePath + '.map', 'utf8');
 	let mazeLine = mazeRaw.split('\n');
 
 	let maze = new Maze();
-
-	maze.mazeSize = mazeLine[0].split("x")
-
 	let y: number = -1;
 	for (let line of mazeLine) {
 		let x: number = -1;
@@ -100,7 +118,7 @@ function myMaze(mazePath: string) {
 			let position = `${x}:${y}`;
 			maze.mazeWithPosition[position] = {
 				path: value,
-				isPath:'no'
+				isPath:'2'
 			}
 			if (value == "1") {
 				maze.mazeStart = position;

@@ -11,17 +11,17 @@ var Maze = /** @class */ (function () {
         this.lastPos = 'Bot';
         this.isSolved = false;
         this.nextPosition = [];
-        this.step = 0;
+        this.etp = 0;
         this.currentPos = [];
         this.count = 0;
     }
     Maze.prototype.solve = function () {
-        this.step++;
+        this.etp++;
         for (var _i = 0, _a = this.currentPos; _i < _a.length; _i++) {
             var pos = _a[_i];
             if (pos === this.mazeStart) {
                 this.count++;
-                this.mazeWithPosition[pos].step = 0;
+                this.mazeWithPosition[pos].etp = 0;
                 // for(let test in this.mazeWithPosition)
                 // {
                 // 	if(this.mazeWithPosition[test].isPath == 'yes'){
@@ -37,25 +37,25 @@ var Maze = /** @class */ (function () {
         this.currentPos = this.nextPosition;
     };
     Maze.prototype.changeStep = function (X, Y) {
-        this.stepPosition((X + 1) + ":" + Y, this.mazeWithPosition[X + ":" + Y].step + 1);
-        this.stepPosition((X - 1) + ":" + Y, this.mazeWithPosition[X + ":" + Y].step + 1);
-        this.stepPosition(X + ":" + (Y + 1), this.mazeWithPosition[X + ":" + Y].step + 1);
-        this.stepPosition(X + ":" + (Y - 1), this.mazeWithPosition[X + ":" + Y].step + 1);
+        this.position((X + 1) + ":" + Y, this.mazeWithPosition[X + ":" + Y].etp + 1);
+        this.position((X - 1) + ":" + Y, this.mazeWithPosition[X + ":" + Y].etp + 1);
+        this.position(X + ":" + (Y + 1), this.mazeWithPosition[X + ":" + Y].etp + 1);
+        this.position(X + ":" + (Y - 1), this.mazeWithPosition[X + ":" + Y].etp + 1);
     };
-    Maze.prototype.stepPosition = function (pos, step) {
+    Maze.prototype.position = function (pos, etp) {
         if (!this.mazeWithPosition[pos]) {
             return;
         }
         if (this.mazeWithPosition[pos].path == ' ') {
-            if (this.mazeWithPosition[pos].step >= 0) {
+            if (this.mazeWithPosition[pos].etp >= 0) {
                 return;
             }
-            this.mazeWithPosition[pos].step = step;
-            this.mazeWithPosition[pos].isPath = 'yes';
+            this.mazeWithPosition[pos].etp = etp;
+            this.mazeWithPosition[pos].isPath = '.';
             this.nextPosition.push(pos);
         }
         if (this.mazeWithPosition[pos].path == '2') {
-            this.mazeWithPosition[pos].step = step;
+            this.mazeWithPosition[pos].etp = etp;
             this.isSolved = true;
         }
     };
@@ -68,14 +68,32 @@ function solveMaze() {
     while (maze.isSolved != true) {
         maze.solve();
     }
-    console.log(maze.mazeWithPosition);
+    save(maze);
     console.timeEnd('Solved in');
+}
+function save(maze) {
+    var oldY = 0;
+    for (var obj in maze.mazeWithPosition) {
+        var XandY = obj.split(":");
+        var X = parseInt(XandY[0], 10);
+        var Y = parseInt(XandY[1], 10);
+        if (Y > oldY) {
+            maze.mazeSaveArray = maze.mazeSaveArray + '\n';
+        }
+        if (maze.mazeWithPosition[obj]['etp']) {
+            maze.mazeSaveArray = maze.mazeSaveArray + maze.mazeWithPosition[obj]['isPath'];
+        }
+        else {
+            maze.mazeSaveArray = maze.mazeSaveArray + maze.mazeWithPosition[obj]['path'];
+        }
+        oldY = Y;
+    }
+    console.log(maze.mazeSaveArray);
 }
 function myMaze(mazePath) {
     var mazeRaw = fs_1.readFileSync('data/maps/' + mazePath + '.map', 'utf8');
     var mazeLine = mazeRaw.split('\n');
     var maze = new Maze();
-    maze.mazeSize = mazeLine[0].split("x");
     var y = -1;
     for (var _i = 0, mazeLine_1 = mazeLine; _i < mazeLine_1.length; _i++) {
         var line = mazeLine_1[_i];
@@ -90,7 +108,7 @@ function myMaze(mazePath) {
             var position = x + ":" + y;
             maze.mazeWithPosition[position] = {
                 path: value,
-                isPath: 'no'
+                isPath: '2'
             };
             if (value == "1") {
                 maze.mazeStart = position;
